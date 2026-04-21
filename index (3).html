@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EcoQuiz - Economia Circular e Óleo de Cozinha</title>
+    <style>
+        /* ========== ESTILOS GLOBAIS ========== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        /* ========== CONTAINER PRINCIPAL ========== */
+        .container {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 550px;
+            text-align: center;
+        }
+
+        /* ========== CABEÇALHO ========== */
+        header {
+            margin-bottom: 20px;
+        }
+
+        .institution-tag {
+            font-size: 0.8rem;
+            margin: 0;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        h1 {
+            color: #1b5e20;
+            font-size: 24px;
+            margin: 10px 0;
+            line-height: 1.3;
+        }
+
+        /* ========== TELA DE BLOQUEIO ========== */
+        #lock-screen {
+            padding: 20px 0;
+        }
+
+        .lock-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        .alert-text {
+            color: #555;
+            line-height: 1.5;
+            margin: 15px 0;
+        }
+
+        .last-score-display {
+            background: #f1f8e9;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            border-left: 4px solid #4caf50;
+        }
+
+        #timer {
+            font-weight: bold;
+            color: #c62828;
+            font-size: 1.8rem;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+        }
+
+        .timer-label {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        /* ========== QUIZ ========== */
+        #progress {
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+            color: #666;
+            font-weight: 500;
+        }
+
+        #question-text {
+            min-height: 60px;
+            font-size: 1.1rem;
+            color: #1b5e20;
+            margin-bottom: 20px;
+            line-height: 1.4;
+        }
+
+        /* ========== BOTÕES DE RESPOSTA ========== */
+        #options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-btn {
+            padding: 15px;
+            border: 2px solid #a5d6a7;
+            border-radius: 8px;
+            background: white;
+            color: #2e7d32;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: left;
+            position: relative;
+        }
+
+        .option-btn:hover {
+            background: #c8e6c9;
+            border-color: #2e7d32;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .option-btn:active {
+            transform: translateY(0);
+        }
+
+        .option-letter {
+            display: inline-block;
+            width: 28px;
+            height: 28px;
+            background: #e8f5e9;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 28px;
+            margin-right: 10px;
+            font-size: 0.85rem;
+            color: #1b5e20;
+        }
+
+        /* ========== TELA DE RESULTADO ========== */
+        #result-screen {
+            padding: 20px 0;
+        }
+
+        .score-circle {
+            font-size: 60px;
+            font-weight: bold;
+            margin: 20px 0;
+            color: #1b5e20;
+            background: #f1f8e9;
+            width: 120px;
+            height: 120px;
+            line-height: 110px;
+            border-radius: 50%;
+            display: inline-block;
+            border: 5px solid #4caf50;
+        }
+
+        .score-message {
+            font-size: 1.1rem;
+            color: #555;
+            margin: 15px 0;
+        }
+
+        .score-detail {
+            color: #666;
+            font-size: 0.95rem;
+        }
+
+        .restart-hint {
+            margin-top: 20px;
+            padding: 15px;
+            background: #fff3e0;
+            border-radius: 8px;
+            color: #e65100;
+            font-size: 0.9rem;
+        }
+
+        /* ========== UTILITÁRIOS ========== */
+        .hidden {
+            display: none !important;
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid #eee;
+            margin: 20px 0;
+        }
+
+        /* ========== ANIMAÇÕES ========== */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease;
+        }
+
+        /* ========== RESPONSIVO ========== */
+        @media (max-width: 480px) {
+            .container {
+                padding: 1.5rem;
+            }
+            
+            h1 {
+                font-size: 20px;
+            }
+            
+            .option-btn {
+                font-size: 14px;
+                padding: 12px;
+            }
+            
+            .score-circle {
+                width: 100px;
+                height: 100px;
+                line-height: 90px;
+                font-size: 48px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- ===== TELA DE BLOQUEIO (cooldown) ===== -->
+        <div id="lock-screen" class="hidden">
+            <div class="lock-icon">🔒</div>
+            <h1>Acesso Restrito</h1>
+            <p class="alert-text">Você já completou o desafio ambiental recentemente.</p>
+            
+            <div class="last-score-display">
+                <p>Sua última pontuação:</p>
+                <p style="font-size: 1.5rem; color: #1b5e20; margin-top: 5px;">
+                    <strong><span id="last-score">0</span> / 10</strong>
+                </p>
+            </div>
+            
+            <hr>
+            
+            <p class="timer-label">Nova tentativa disponível em:</p>
+            <div id="timer">--:--</div>
+        </div>
+
+        <!-- ===== TELA DO QUIZ ===== -->
+        <div id="quiz-container">
+            <header>
+                <p class="institution-tag">UFOPA - Ciências Ambientais</p>
+                <h1>Quiz: Óleo & Economia Circular</h1>
+                <div id="progress">Carregando...</div>
+            </header>
+            
+            <div id="question-box" class="fade-in">
+                <h2 id="question-text">Aguarde...</h2>
+                <div id="options-container"></div>
+            </div>
+        </div>
+
+        <!-- ===== TELA DE RESULTADO ===== -->
+        <div id="result-screen" class="hidden">
+            <h1>🎉 Fim da Jornada!</h1>
+            <p class="score-message">Sua consciência ambiental rendeu:</p>
+            
+            <div class="score-circle">
+                <span id="final-score">0</span>
+            </div>
+            
+            <p class="score-detail"><strong>Pontos de 10 possíveis.</strong></p>
+            <p class="alert-text">Obrigado por participar! Seu resultado foi salvo.</p>
+            
+            <div class="restart-hint">
+                ⏱️ Você poderá tentar novamente em <strong>7 minutos</strong>.
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* ========== BANCO DE PERGUNTAS ========== */
+        const questionsData = [
+            {
+                q: "Qual modelo busca reduzir desperdícios e aproveitar melhor os recursos?",
+                a: ["Economia Circular", "Economia Linear", "Economia de Escala", "Economia Extrativista"],
+                c: 0
+            },
+            {
+                q: "Na Economia Linear, qual é o ciclo comum dos produtos?",
+                a: ["Extração, processamento e descarte", "Reciclagem e regeneração", "Reuso e compostagem", "Venda e coleta seletiva"],
+                c: 0
+            },
+            {
+                q: "O descarte inadequado de óleo na pia gera qual problema imediato?",
+                a: ["Entupimento e danos na rede de esgoto", "Melhoria da vazão da água", "Limpeza química dos canos", "Produção de energia solar"],
+                c: 0
+            },
+            {
+                q: "O óleo que atinge o solo causa qual impacto ambiental?",
+                a: ["Impede a passagem de ar e água", "Atua como fertilizante natural", "Acelera o crescimento das plantas", "Filtra metais pesados"],
+                c: 0
+            },
+            {
+                q: "Qual a porcentagem de aumento no custo do tratamento de esgoto devido ao óleo?",
+                a: ["Até 45%", "Apenas 5%", "Cerca de 20%", "Mais de 90%"],
+                c: 0
+            },
+            {
+                q: "O que o óleo usado pode se tornar na Economia Circular?",
+                a: ["Biodiesel e Sabão", "Somente fumaça", "Plástico virgem", "Água potável"],
+                c: 0
+            },
+            {
+                q: "Qual é o procedimento correto inicial para descartar o óleo?",
+                a: ["Deixar o óleo esfriar", "Misturar com detergente", "Jogar no ralo com água quente", "Despejar diretamente no lixo"],
+                c: 0
+            },
+            {
+                q: "Onde o óleo deve ser armazenado após o uso?",
+                a: ["Em um recipiente (garrafa PET)", "Na própria frigideira", "Em sacos de lixo abertos", "No congelador"],
+                c: 0
+            },
+            {
+                q: "A economia circular preza pela gestão de recursos...",
+                a: ["Finitos para recuperar seus valores", "Infinitos para consumo livre", "Naturais apenas para exportação", "Sintéticos sem reciclagem"],
+                c: 0
+            },
+            {
+                q: "A contaminação por óleo pode atingir fontes de águas...",
+                a: ["Subterrâneas (lençóis freáticos)", "Apenas superficiais", "Somente em oceanos", "Nenhuma das anteriores"],
+                c: 0
+            }
+        ];
+
+        /* ========== VARIÁVEIS DE ESTADO ========== */
+        let currentQuestionIndex = 0;
+        let userScore = 0;
+        let shuffledQuestions = [];
+        const TOTAL_QUESTIONS = 10;
+        const COOLDOWN_MINUTES = 7;
+        const COOLDOWN_MS = COOLDOWN_MINUTES * 60 * 1000;
+
+        /* ========== INICIALIZAÇÃO ========== */
+        function init() {
+            const lastAttemptTime = localStorage.getItem('ecoQuizTime');
+            const now = new Date().getTime();
+
+            // Verifica se está em período de cooldown
+            if (lastAttemptTime && (now - parseInt(lastAttemptTime)) < COOLDOWN_MS) {
+                showLockScreen(parseInt(lastAttemptTime));
+            } else {
+                // Limpa dados antigos e inicia novo quiz
+                if (lastAttemptTime) {
+                    localStorage.removeItem('ecoQuizTime');
+                }
+                startQuiz();
+            }
+        }
+
+        /* ========== INICIAR QUIZ ========== */
+        function startQuiz() {
+            currentQuestionIndex = 0;
+            userScore = 0;
+            
+            // Embaralha perguntas (Fisher-Yates)
+            shuffledQuestions = [...questionsData];
+            for (let i = shuffledQuestions.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffledQuestions[i], shuffledQuestions[j]] = [shuffledQuestions[j], shuffledQuestions[i]];
+            }
+            
+            // Garante que temos exatamente 10 perguntas
+            shuffledQuestions = shuffledQuestions.slice(0, TOTAL_QUESTIONS);
+            
+            showQuestion();
+        }
+
+        /* ========== EXIBIR PERGUNTA ========== */
+        function showQuestion() {
+            const q = shuffledQuestions[currentQuestionIndex];
+            
+            // Atualiza progresso
+            document.getElementById('progress').textContent = 
+                `Pergunta ${currentQuestionIndex + 1} de ${TOTAL_QUESTIONS}`;
+            
+            // Atualiza texto da pergunta
+            document.getElementById('question-text').textContent = q.q;
+            
+            // Gera botões de opção
+            const container = document.getElementById('options-container');
+            container.innerHTML = '';
+            
+            const letters = ['A', 'B', 'C', 'D'];
+            
+            q.a.forEach((optText, optIndex) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn fade-in';
+                btn.innerHTML = `
+                    <span class="option-letter">${letters[optIndex]}</span>
+                    ${optText}
+                `;
+                btn.onclick = () => handleAnswer(optIndex);
+                container.appendChild(btn);
+            });
+        }
+
+        /* ========== PROCESSAR RESPOSTA ========== */
+        function handleAnswer(selectedIndex) {
+            const currentQuestion = shuffledQuestions[currentQuestionIndex];
+            
+            // Verifica acerto (sem mostrar feedback, vai direto)
+            if (selectedIndex === currentQuestion.c) {
+                userScore++;
+            }
+            
+            // Avança para próxima pergunta ou finaliza
+            currentQuestionIndex++;
+            
+            if (currentQuestionIndex < TOTAL_QUESTIONS) {
+                showQuestion();
+            } else {
+                finishQuiz();
+            }
+        }
+
+        /* ========== FINALIZAR QUIZ ========== */
+        function finishQuiz() {
+            // Salva no localStorage
+            const now = new Date().getTime();
+            localStorage.setItem('ecoQuizScore', userScore);
+            localStorage.setItem('ecoQuizTime', now);
+            
+            // Transição de telas
+            document.getElementById('quiz-container').classList.add('hidden');
+            document.getElementById('result-screen').classList.remove('hidden');
+            document.getElementById('final-score').textContent = userScore;
+        }
+
+        /* ========== TELA DE BLOQUEIO ========== */
+        function showLockScreen(lastTime) {
+            document.getElementById('quiz-container').classList.add('hidden');
+            document.getElementById('lock-screen').classList.remove('hidden');
+            
+            // Mostra última pontuação
+            const lastScore = localStorage.getItem('ecoQuizScore') || 0;
+            document.getElementById('last-score').textContent = lastScore;
+            
+            // Inicia contador regressivo
+            const timerDisplay = document.getElementById('timer');
+            
+            const interval = setInterval(() => {
+                const now = new Date().getTime();
+                const distance = COOLDOWN_MS - (now - lastTime);
+                
+                if (distance <= 0) {
+                    clearInterval(interval);
+                    localStorage.removeItem('ecoQuizTime');
+                    location.reload();
+                    return;
+                }
+                
+                const minutes = Math.floor(distance / (1000 * 60));
+                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+                
+                timerDisplay.textContent = 
+                    `${minutes.toString().padStart(2, '0')}m ${seconds.toString().padStart(2, '0')}s`;
+            }, 1000);
+            
+            // Executa imediatamente para não esperar 1s
+            const now = new Date().getTime();
+            const initialDistance = COOLDOWN_MS - (now - lastTime);
+            const initialMinutes = Math.floor(initialDistance / (1000 * 60));
+            const initialSeconds = Math.floor((initialDistance % (1000 * 60)) / 1000);
+            timerDisplay.textContent = 
+                `${initialMinutes.toString().padStart(2, '0')}m ${initialSeconds.toString().padStart(2, '0')}s`;
+        }
+
+        /* ========== EXECUTAR AO CARREGAR ========== */
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+
+</body>
+</html>
