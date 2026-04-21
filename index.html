@@ -292,56 +292,98 @@
 
     <script>
         /* ========== BANCO DE PERGUNTAS ========== */
+        // Agora as alternativas estão em ordem aleatória no banco
+        // A resposta correta está marcada pelo índice, não pela posição
         const questionsData = [
             {
                 q: "Qual modelo busca reduzir desperdícios e aproveitar melhor os recursos?",
-                a: ["Economia Circular", "Economia Linear", "Economia de Escala", "Economia Extrativista"],
-                c: 0
+                a: [
+                    { text: "Economia de Escala", correct: false },
+                    { text: "Economia Circular", correct: true },
+                    { text: "Economia Linear", correct: false },
+                    { text: "Economia Extrativista", correct: false }
+                ]
             },
             {
                 q: "Na Economia Linear, qual é o ciclo comum dos produtos?",
-                a: ["Extração, processamento e descarte", "Reciclagem e regeneração", "Reuso e compostagem", "Venda e coleta seletiva"],
-                c: 0
+                a: [
+                    { text: "Reciclagem e regeneração", correct: false },
+                    { text: "Reuso e compostagem", correct: false },
+                    { text: "Extração, processamento e descarte", correct: true },
+                    { text: "Venda e coleta seletiva", correct: false }
+                ]
             },
             {
                 q: "O descarte inadequado de óleo na pia gera qual problema imediato?",
-                a: ["Entupimento e danos na rede de esgoto", "Melhoria da vazão da água", "Limpeza química dos canos", "Produção de energia solar"],
-                c: 0
+                a: [
+                    { text: "Melhoria da vazão da água", correct: false },
+                    { text: "Entupimento e danos na rede de esgoto", correct: true },
+                    { text: "Limpeza química dos canos", correct: false },
+                    { text: "Produção de energia solar", correct: false }
+                ]
             },
             {
                 q: "O óleo que atinge o solo causa qual impacto ambiental?",
-                a: ["Impede a passagem de ar e água", "Atua como fertilizante natural", "Acelera o crescimento das plantas", "Filtra metais pesados"],
-                c: 0
+                a: [
+                    { text: "Atua como fertilizante natural", correct: false },
+                    { text: "Acelera o crescimento das plantas", correct: false },
+                    { text: "Impede a passagem de ar e água", correct: true },
+                    { text: "Filtra metais pesados", correct: false }
+                ]
             },
             {
                 q: "Qual a porcentagem de aumento no custo do tratamento de esgoto devido ao óleo?",
-                a: ["Até 45%", "Apenas 5%", "Cerca de 20%", "Mais de 90%"],
-                c: 0
+                a: [
+                    { text: "Apenas 5%", correct: false },
+                    { text: "Até 45%", correct: true },
+                    { text: "Cerca de 20%", correct: false },
+                    { text: "Mais de 90%", correct: false }
+                ]
             },
             {
                 q: "O que o óleo usado pode se tornar na Economia Circular?",
-                a: ["Biodiesel e Sabão", "Somente fumaça", "Plástico virgem", "Água potável"],
-                c: 0
+                a: [
+                    { text: "Biodiesel e Sabão", correct: true },
+                    { text: "Somente fumaça", correct: false },
+                    { text: "Plástico virgem", correct: false },
+                    { text: "Água potável", correct: false }
+                ]
             },
             {
                 q: "Qual é o procedimento correto inicial para descartar o óleo?",
-                a: ["Deixar o óleo esfriar", "Misturar com detergente", "Jogar no ralo com água quente", "Despejar diretamente no lixo"],
-                c: 0
+                a: [
+                    { text: "Misturar com detergente", correct: false },
+                    { text: "Jogar no ralo com água quente", correct: false },
+                    { text: "Deixar o óleo esfriar", correct: true },
+                    { text: "Despejar diretamente no lixo", correct: false }
+                ]
             },
             {
                 q: "Onde o óleo deve ser armazenado após o uso?",
-                a: ["Em um recipiente (garrafa PET)", "Na própria frigideira", "Em sacos de lixo abertos", "No congelador"],
-                c: 0
+                a: [
+                    { text: "Na própria frigideira", correct: false },
+                    { text: "Em sacos de lixo abertos", correct: false },
+                    { text: "Em um recipiente (garrafa PET)", correct: true },
+                    { text: "No congelador", correct: false }
+                ]
             },
             {
                 q: "A economia circular preza pela gestão de recursos...",
-                a: ["Finitos para recuperar seus valores", "Infinitos para consumo livre", "Naturais apenas para exportação", "Sintéticos sem reciclagem"],
-                c: 0
+                a: [
+                    { text: "Infinitos para consumo livre", correct: false },
+                    { text: "Finitos para recuperar seus valores", correct: true },
+                    { text: "Naturais apenas para exportação", correct: false },
+                    { text: "Sintéticos sem reciclagem", correct: false }
+                ]
             },
             {
                 q: "A contaminação por óleo pode atingir fontes de águas...",
-                a: ["Subterrâneas (lençóis freáticos)", "Apenas superficiais", "Somente em oceanos", "Nenhuma das anteriores"],
-                c: 0
+                a: [
+                    { text: "Apenas superficiais", correct: false },
+                    { text: "Somente em oceanos", correct: false },
+                    { text: "Subterrâneas (lençóis freáticos)", correct: true },
+                    { text: "Nenhuma das anteriores", correct: false }
+                ]
             }
         ];
 
@@ -352,6 +394,54 @@
         const TOTAL_QUESTIONS = 10;
         const COOLDOWN_MINUTES = 7;
         const COOLDOWN_MS = COOLDOWN_MINUTES * 60 * 1000;
+
+        /* ========== GERADOR DE SEED POR USUÁRIO ========== */
+        function getUserSeed() {
+            // Gera um identificador único persistente para o navegador
+            let userId = localStorage.getItem('ecoQuizUserId');
+            if (!userId) {
+                userId = 'user_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
+                localStorage.setItem('ecoQuizUserId', userId);
+            }
+            // Converte string em número para seed
+            let hash = 0;
+            for (let i = 0; i < userId.length; i++) {
+                const char = userId.charCodeAt(i);
+                hash = ((hash << 5) - hash) + char;
+                hash = hash & hash; // Converte para 32bit inteiro
+            }
+            return Math.abs(hash);
+        }
+
+        /* ========== EMBARALHAMENTO COM SEED ========== */
+        function seededShuffle(array, seed) {
+            const result = [...array];
+            let currentSeed = seed;
+            
+            // Gerador de número pseudo-aleatório com seed
+            function random() {
+                const x = Math.sin(currentSeed++) * 10000;
+                return x - Math.floor(x);
+            }
+            
+            for (let i = result.length - 1; i > 0; i--) {
+                const j = Math.floor(random() * (i + 1));
+                [result[i], result[j]] = [result[j], result[i]];
+            }
+            return result;
+        }
+
+        /* ========== EMBARALHAR ALTERNATIVAS DE CADA PERGUNTA ========== */
+        function shuffleOptions(question, seed) {
+            const shuffledOptions = seededShuffle([...question.a], seed);
+            // Encontra o novo índice da resposta correta
+            const correctIndex = shuffledOptions.findIndex(opt => opt.correct);
+            return {
+                q: question.q,
+                options: shuffledOptions.map(opt => opt.text),
+                correctIndex: correctIndex
+            };
+        }
 
         /* ========== INICIALIZAÇÃO ========== */
         function init() {
@@ -375,15 +465,16 @@
             currentQuestionIndex = 0;
             userScore = 0;
             
-            // Embaralha perguntas (Fisher-Yates)
-            shuffledQuestions = [...questionsData];
-            for (let i = shuffledQuestions.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [shuffledQuestions[i], shuffledQuestions[j]] = [shuffledQuestions[j], shuffledQuestions[i]];
-            }
+            const userSeed = getUserSeed();
             
-            // Garante que temos exatamente 10 perguntas
-            shuffledQuestions = shuffledQuestions.slice(0, TOTAL_QUESTIONS);
+            // Embaralha a ordem das perguntas com seed do usuário
+            const shuffledOrder = seededShuffle([...questionsData], userSeed);
+            
+            // Para cada pergunta, embaralha as alternativas com seed diferente
+            shuffledQuestions = shuffledOrder.slice(0, TOTAL_QUESTIONS).map((q, index) => {
+                // Usa um seed diferente para cada pergunta (baseado no userSeed)
+                return shuffleOptions(q, userSeed + index * 1000);
+            });
             
             showQuestion();
         }
@@ -405,7 +496,7 @@
             
             const letters = ['A', 'B', 'C', 'D'];
             
-            q.a.forEach((optText, optIndex) => {
+            q.options.forEach((optText, optIndex) => {
                 const btn = document.createElement('button');
                 btn.className = 'option-btn fade-in';
                 btn.innerHTML = `
@@ -421,8 +512,8 @@
         function handleAnswer(selectedIndex) {
             const currentQuestion = shuffledQuestions[currentQuestionIndex];
             
-            // Verifica acerto (sem mostrar feedback, vai direto)
-            if (selectedIndex === currentQuestion.c) {
+            // Verifica acerto usando o índice correto embaralhado
+            if (selectedIndex === currentQuestion.correctIndex) {
                 userScore++;
             }
             
