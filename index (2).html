@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EcoQuiz - Economia Circular e Óleo de Cozinha</title>
+    <style>
+        /* Estilização (CSS) */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            width: 90%;
+            max-width: 550px;
+            text-align: center;
+        }
+
+        h1 { color: #1b5e20; font-size: 24px; }
+
+        #options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 15px;
+            border: 2px solid #a5d6a7;
+            border-radius: 8px;
+            background: white;
+            color: #2e7d32;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        button:hover {
+            background: #c8e6c9;
+            border-color: #2e7d32;
+            transform: translateY(-2px);
+        }
+
+        .hidden { display: none; }
+
+        .score-circle {
+            font-size: 60px;
+            font-weight: bold;
+            margin: 20px 0;
+            color: #1b5e20;
+            background: #f1f8e9;
+            width: 120px;
+            height: 120px;
+            line-height: 120px;
+            border-radius: 50%;
+            display: inline-block;
+            border: 5px solid #4caf50;
+        }
+
+        #timer {
+            font-weight: bold;
+            color: #c62828;
+            font-size: 1.2rem;
+        }
+
+        #progress {
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .alert-text { color: #555; line-height: 1.5; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div id="lock-screen" class="hidden">
+            <h1>Acesso Restrito</h1>
+            <p class="alert-text">Você já completou o desafio ambiental recentemente.</p>
+            <p>Sua última pontuação: <strong><span id="last-score"></span>/10</strong></p>
+            <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+            <p>Nova tentativa disponível em:</p>
+            <div id="timer">--:--</div>
+        </div>
+
+        <div id="quiz-container">
+            <header>
+                <p style="font-size: 0.8rem; margin: 0; color: #888;">UFOPA - Ciências Ambientais</p>
+                <h1>Quiz: Óleo & Economia Circular</h1>
+                <div id="progress">Carregando...</div>
+            </header>
+            
+            <div id="question-box">
+                <h2 id="question-text" style="min-height: 60px;">Aguarde...</h2>
+                <div id="options-container">
+                    </div>
+            </div>
+        </div>
+
+        <div id="result-screen" class="hidden">
+            <h1>Fim da Jornada!</h1>
+            <p>Sua consciência ambiental rendeu:</p>
+            <div class="score-circle">
+                <span id="final-score">0</span>
+            </div>
+            <p><strong>Pontos de 10 possíveis.</strong></p>
+            <p class="alert-text">Obrigado por participar! O sistema salvará seu resultado.</p>
+        </div>
+    </div>
+
+    <script>
+        /* Lógica do Jogo (JavaScript) baseada no conteúdo PDF */
+        const questionsData = [
+            { q: "Qual modelo busca reduzir desperdícios e aproveitar melhor os recursos?", a: ["Economia Circular", "Economia Linear", "Economia de Escala", "Economia Extrativista"], c: 0 },
+            { q: "Na Economia Linear, qual é o ciclo comum dos produtos?", a: ["Extração, processamento e descarte", "Reciclagem e regeneração", "Reuso e compostagem", "Venda e coleta seletiva"], c: 0 },
+            { q: "O descarte inadequado de óleo na pia gera qual problema imediato?", a: ["Entupimento e danos na rede de esgoto", "Melhoria da vazão da água", "Limpeza química dos canos", "Produção de energia solar"], c: 0 },
+            { q: "O óleo que atinge o solo causa qual impacto ambiental?", a: ["Impede a passagem de ar e água", "Atua como fertilizante natural", "Acelera o crescimento das plantas", "Filtra metais pesados"], c: 0 },
+            { q: "Qual a porcentagem de aumento no custo do tratamento de esgoto devido ao óleo?", a: ["Até 45%", "Apenas 5%", "Cerca de 20%", "Mais de 90%"], c: 0 },
+            { q: "O que o óleo usado pode se tornar na Economia Circular?", a: ["Biodiesel e Sabão", "Somente fumaça", "Plástico virgem", "Água potável"], c: 0 },
+            { q: "Qual é o procedimento correto inicial para descartar o óleo?", a: ["Deixar o óleo esfriar", "Misturar com detergente", "Jogar no ralo com água quente", "Despejar diretamente no lixo"], c: 0 },
+            { q: "Onde o óleo deve ser armazenado após o uso?", a: ["Em um recipiente (garrafa PET)", "Na própria frigideira", "Em sacos de lixo abertos", "No congelador"], c: 0 },
+            { q: "A economia circular preza pela gestão de recursos...", a: ["Finitos para recuperar seus valores", "Infinitos para consumo livre", "Naturais apenas para exportação", "Sintéticos sem reciclagem"], c: 0 },
+            { q: "A contaminação por óleo pode atingir fontes de águas...", a: ["Subterrâneas (lençóis freáticos)", "Apenas superficiais", "Somente em oceanos", "Nenhuma das anteriores"], c: 0 }
+        ];
+
+        let currentQuestionIndex = 0;
+        let userScore = 0;
+        let shuffledQuestions = [];
+
+        // Inicialização
+        function init() {
+            const lastAttemptTime = localStorage.getItem('ecoQuizTime');
+            const now = new Date().getTime();
+            const waitPeriod = 7 * 60 * 1000; // 7 minutos em milissegundos
+
+            if (lastAttemptTime && (now - lastAttemptTime) < waitPeriod) {
+                showLockScreen(parseInt(lastAttemptTime), waitPeriod);
+            } else {
+                startQuiz();
+            }
+        }
+
+        function startQuiz() {
+            // Embaralha as perguntas para variar a cada acesso
+            shuffledQuestions = questionsData.sort(() => Math.random() - 0.5);
+            showQuestion();
+        }
+
+        function showQuestion() {
+            const q = shuffledQuestions[currentQuestionIndex];
+            document.getElementById('progress').innerText = `Pergunta ${currentQuestionIndex + 1} de 10`;
+            document.getElementById('question-text').innerText = q.q;
+            
+            const container = document.getElementById('options-container');
+            container.innerHTML = '';
+
+            // Embaralha as alternativas também
+            const options = q.a.map((text, index) => ({ text, index }));
+            // Para manter a resposta correta rastreável, não embaralhamos o índice interno 'c'
+            
+            q.a.forEach((optText, optIndex) => {
+                const btn = document.createElement('button');
+                btn.innerText = optText;
+                btn.onclick = () => handleAnswer(optIndex);
+                container.appendChild(btn);
+            });
+        }
+
+        function handleAnswer(selectedIndex) {
+            // Sem segunda chance: verifica e passa para a próxima
+            if (selectedIndex === shuffledQuestions[currentQuestionIndex].c) {
+                userScore++;
+            }
+            
+            currentQuestionIndex++;
+            if (currentQuestionIndex < 10) {
+                showQuestion();
+            } else {
+                finishQuiz();
+            }
+        }
+
+        function finishQuiz() {
+            // Salva os dados no navegador
+            localStorage.setItem('ecoQuizScore', userScore);
+            localStorage.setItem('ecoQuizTime', new Date().getTime());
+            
+            document.getElementById('quiz-container').classList.add('hidden');
+            document.getElementById('result-screen').classList.remove('hidden');
+            document.getElementById('final-score').innerText = userScore;
+        }
+
+        function showLockScreen(lastTime, waitPeriod) {
+            document.getElementById('quiz-container').classList.add('hidden');
+            document.getElementById('lock-screen').classList.remove('hidden');
+            document.getElementById('last-score').innerText = localStorage.getItem('ecoQuizScore') || 0;
+            
+            const timerDisplay = document.getElementById('timer');
+            
+            const interval = setInterval(() => {
+                const now = new Date().getTime();
+                const distance = waitPeriod - (now - lastTime);
+                
+                const minutes = Math.floor(distance / (1000 * 60));
+                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+                
+                timerDisplay.innerHTML = `${minutes}m ${seconds}s`;
+                
+                if (distance <= 0) {
+                    clearInterval(interval);
+                    localStorage.removeItem('ecoQuizTime'); // Libera o acesso
+                    location.reload();
+                }
+            }, 1000);
+        }
+
+        // Executa ao carregar
+        init();
+    </script>
+</body>
+</html>
